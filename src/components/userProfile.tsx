@@ -26,11 +26,31 @@ class UserProfile extends Component<{}, MyState> {
     {
       if(auth.currentUser)
       {
-        this.setState( {
-          displayName : auth.currentUser.displayName!,
-          profile_photo : auth.currentUser.photoURL!,
-          phoneNumber: auth.currentUser.phoneNumber!
-        })
+        const databaseRef = database.ref(`users/${auth.currentUser.uid}`);
+        databaseRef.on('value' , (snapshot) => {
+          //If user exists in database get his data
+          if(snapshot.hasChildren())
+          {
+            console.log(snapshot.ref);
+            
+            this.setState( {
+              displayName : snapshot.child('displayName').val(),
+              profile_photo : snapshot.child('photoURL').val(),
+              phoneNumber: snapshot.child('phoneNumber').val()
+            });
+          }
+
+          //Else Add new user to the database
+          else
+          {
+            databaseRef.set( {
+              displayName : "Press Edit to Update",
+              profile_photo : "",
+              phoneNumber: ""
+            });
+          }
+          
+        });
       }
     }
 
@@ -44,20 +64,21 @@ class UserProfile extends Component<{}, MyState> {
       const { displayName , profile_photo , phoneNumber} = this.state;
   
       return (
-        <div>
-          <h1>Profile</h1>
+        <div id="profilePage">
+          <h1>Profile Details</h1>
           <div className = "image"
             style={{
               background: `url(${profile_photo || 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Gnome-stock_person.svg/1024px-Gnome-stock_person.svg.png'})  no-repeat center center`,
               backgroundSize: "cover",
-              height: "200px",
-              width: "200px"
+              height: "300px",
+              width: "300px",
+              margin:"auto"
             }}
           ></div>
 
-          <div className="usrdata">
-            <h2>{displayName}</h2>
-            <h3>{phoneNumber}</h3>
+          <div className="userdata">
+            <h2>Name : {displayName}</h2>
+            <h3>Phone Number : {phoneNumber}</h3>
           </div>
           <button onClick = {this.handleLogOut}>Sign out</button>
         </div>

@@ -21,6 +21,8 @@ class Login extends Component<RouteComponentProps, MyState> {
     submitHandler = (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
 
+        // sign in email & password check
+        // If success LoggedIn state changes and App renders Profile
         auth.signInWithEmailAndPassword(this.state.email,this.state.password)
         .catch(err => {
             alert(err.message);

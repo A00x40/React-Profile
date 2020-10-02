@@ -16,6 +16,8 @@ class App extends Component<{},MyState> {
     constructor(props:{})
     {
       super(props);
+
+      //boolean to render Profile if true - SignIn/SignUp if false
       this.state = {
         isLogged:false
       }
@@ -23,6 +25,7 @@ class App extends Component<{},MyState> {
 
     componentDidMount()
     {
+      //Listener to signIn state
       auth.onAuthStateChanged((userAuth) => {
         if(userAuth)
         {
@@ -32,8 +35,6 @@ class App extends Component<{},MyState> {
         {
           this.setState({isLogged:false});
         }
-        console.log(this.state.isLogged);
-
       });
     }
     render(){

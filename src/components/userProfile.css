@@ -1,13 +1,17 @@
+#profilePage h1 {
+    text-align: center;
+}
 .userdata
 {
-    text-align: left;
     margin: 20px 0;
+    text-align: center;
 }
 
-button {
+#profilePage button {
     background: #4CAF50;
     text-transform: uppercase;
-    width: 100%;
+    width: 500px;
+    height:50px;
     border: 0;
-    padding: 15px;
+    margin-left: 400px;
 }

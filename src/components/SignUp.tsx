@@ -26,7 +26,7 @@ class SignUp extends Component<RouteComponentProps, MyState> {
  
         auth.createUserWithEmailAndPassword(email,password)
         .then( () => {
-            this.props.history.push('/login');
+            this.props.history.push('/');
         })
         .catch(err => {
             alert(err.message);
