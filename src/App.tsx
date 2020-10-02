@@ -38,7 +38,7 @@ class App extends Component<{},MyState> {
       });
     }
     render(){
-      let {isLogged} = this.state;
+      var {isLogged} = this.state;
       const conditionalRender = () => {
         if(isLogged)
         {

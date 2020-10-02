@@ -18,7 +18,7 @@ class Login extends Component<RouteComponentProps, MyState> {
         };
     }
 
-    submitHandler = (event: React.MouseEvent<HTMLButtonElement>) => {
+    handleSubmit = (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
 
         // sign in email & password check
@@ -45,7 +45,7 @@ class Login extends Component<RouteComponentProps, MyState> {
                     <form  className="in-form">
                         <input type="text" onChange={this.handleChange} name="email" placeholder="email"/>
                         <input type="password" onChange={this.handleChange} name="password" placeholder="password"/>
-                        <button onClick={this.submitHandler}>login</button>
+                        <button onClick={this.handleSubmit}>login</button>
                     </form>
                 </div>
             </div>

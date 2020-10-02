@@ -9,8 +9,12 @@ interface MyState
   displayName : string,
   profile_photo : string,
   phoneNumber : string
+  updatedName : string,
+  updatedNumber: string, 
+  uploadedPhoto?: File
 
 }
+
 class UserProfile extends Component<{}, MyState> {
     constructor(props:{})
     {
@@ -19,6 +23,9 @@ class UserProfile extends Component<{}, MyState> {
           displayName : '',
           profile_photo : '',
           phoneNumber:'', 
+          updatedName : '',
+          updatedNumber:'', 
+          uploadedPhoto:undefined
       };
     } 
 
@@ -31,8 +38,6 @@ class UserProfile extends Component<{}, MyState> {
           //If user exists in database get his data
           if(snapshot.hasChildren())
           {
-            console.log(snapshot.ref);
-            
             this.setState( {
               displayName : snapshot.child('displayName').val(),
               profile_photo : snapshot.child('photoURL').val(),
@@ -49,8 +54,8 @@ class UserProfile extends Component<{}, MyState> {
               phoneNumber: ""
             });
           }
-          
         });
+        this.editExpand();
       }
     }
 
@@ -60,6 +65,65 @@ class UserProfile extends Component<{}, MyState> {
       auth.signOut();
     }
   
+    editExpand()
+    {
+      var editDisplay = document.getElementById('edit');
+      if(editDisplay?.style.display === 'none')
+      {
+        editDisplay.style.display = 'block';
+      }
+      else
+      {
+        editDisplay!.style.display = 'none';
+      }
+    }
+
+    handleChange = (event: { target: {name:any , value:any} } ) => {
+      const { name , value } = event.target;
+
+      const newState = { [name]:value } as Pick<MyState,keyof MyState>;
+
+      this.setState(newState);
+    }
+    uploadPhoto  = (event: { target: {name:any , value:any} } ) => {
+      const { value } = event.target;
+      const filetype = value.split('.').pop();
+
+      const validImageTypes = ['gif', 'jpeg', 'png' , 'jpg'];
+      if (validImageTypes.includes(filetype)) {
+        this.setState({
+          uploadedPhoto : value
+        });
+        
+        const storageRef = storage.ref();
+
+        console.log(value);
+        //storageRef.put(value); Error Here
+        
+      }
+      else
+      {
+        alert("The Uploaded File isn't an Image");
+      }      
+    }
+
+    handleUpdate = (event:React.MouseEvent<HTMLButtonElement>) => {
+      const databaseRef = database.ref(`users/${auth.currentUser!.uid}`);
+      databaseRef.on('value' , (snapshot) => {
+        databaseRef.update( {
+            displayName : this.state.updatedName,
+            phoneNumber: this.state.updatedNumber
+        }).then( () => {
+          this.setState( {
+            displayName : snapshot.child('displayName').val(),
+            profile_photo : snapshot.child('photoURL').val(),
+            phoneNumber: snapshot.child('phoneNumber').val()
+          });
+          this.editExpand();
+        });
+      });
+    }
+
     render() {
       const { displayName , profile_photo , phoneNumber} = this.state;
   
@@ -81,6 +145,26 @@ class UserProfile extends Component<{}, MyState> {
             <h3>Phone Number : {phoneNumber}</h3>
           </div>
           <button onClick = {this.handleLogOut}>Sign out</button>
+
+          <button onClick = {this.editExpand}>Edit</button>
+          <div id = "edit" >
+            <div style={{textAlign: "center" , margin : "20px 10px"}}>
+            <label style={{paddingRight : "10px"}}>Enter Name</label>
+            <input type="text" name="updatedName" onChange={this.handleChange}/>
+            </div>
+
+            <div style={{textAlign : "center" , margin : "20px 10px"}}>
+            <label style={{paddingRight : "10px"}}>Enter Phone Number</label>
+            <input type="text" name="updatedNumber" onChange={this.handleChange}/>
+            </div>
+
+            <div style={{textAlign:"center"}}>
+            <input type="file" style={{margin:"auto"}} onChange={this.uploadPhoto} />
+            </div>
+            
+          </div>
+            <button onClick={this.handleUpdate}>Save</button>
+          
         </div>
       );
     }
