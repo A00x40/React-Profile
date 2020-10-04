@@ -7,12 +7,10 @@ import './userProfile.css'
 interface MyState 
 {
   displayName : string,
-  profile_photo : string,
-  phoneNumber : string
+  phoneNumber : string,
+  profile_photo :any,
   updatedName : string,
   updatedNumber: string, 
-  uploadedPhoto?: File
-
 }
 
 class UserProfile extends Component<{}, MyState> {
@@ -21,11 +19,10 @@ class UserProfile extends Component<{}, MyState> {
       super(props);
       this.state  = { 
           displayName : '',
-          profile_photo : '',
           phoneNumber:'', 
+          profile_photo : '',
           updatedName : '',
           updatedNumber:'', 
-          uploadedPhoto:undefined
       };
     } 
 
@@ -50,7 +47,7 @@ class UserProfile extends Component<{}, MyState> {
           {
             databaseRef.set( {
               displayName : "Press Edit to Update",
-              profile_photo : "",
+              photoURL : "",
               phoneNumber: ""
             });
           }
@@ -85,41 +82,50 @@ class UserProfile extends Component<{}, MyState> {
 
       this.setState(newState);
     }
-    uploadPhoto  = (event: { target: {name:any , value:any} } ) => {
-      const { value } = event.target;
-      const filetype = value.split('.').pop();
-
-      const validImageTypes = ['gif', 'jpeg', 'png' , 'jpg'];
-      if (validImageTypes.includes(filetype)) {
-        this.setState({
-          uploadedPhoto : value
-        });
-        
-        const storageRef = storage.ref();
-
-        console.log(value);
-        //storageRef.put(value); Error Here
-        
-      }
-      else
-      {
-        alert("The Uploaded File isn't an Image");
-      }      
-    }
-
+    
     handleUpdate = (event:React.MouseEvent<HTMLButtonElement>) => {
       const databaseRef = database.ref(`users/${auth.currentUser!.uid}`);
+      const storageRef = storage.ref(`users/${auth.currentUser!.uid}`);
+
+      const fileList : any = document.querySelector("#photo");
+
+      if(fileList)
+      {
+          const name = fileList.files[0].name;
+          const metadata = {
+            contentType: fileList.files[0].type
+          }
+
+          storageRef.child(name).put( fileList.files[0] , metadata)
+          
+          .then( (snapshot) => snapshot.ref.getDownloadURL())
+          .then(url => {
+            databaseRef.update( { 
+              photoURL: url
+            });
+          })
+          .catch( (err) => {
+            alert(err.message);
+          });
+      }
+
       databaseRef.on('value' , (snapshot) => {
         databaseRef.update( {
             displayName : this.state.updatedName,
             phoneNumber: this.state.updatedNumber
+
         }).then( () => {
+
           this.setState( {
             displayName : snapshot.child('displayName').val(),
             profile_photo : snapshot.child('photoURL').val(),
-            phoneNumber: snapshot.child('phoneNumber').val()
+            phoneNumber: snapshot.child('phoneNumber').val(),
+            updatedName: '',
+            updatedNumber: ''
           });
+
           this.editExpand();
+
         });
       });
     }
@@ -159,7 +165,7 @@ class UserProfile extends Component<{}, MyState> {
             </div>
 
             <div style={{textAlign:"center"}}>
-            <input type="file" style={{margin:"auto"}} onChange={this.uploadPhoto} />
+            <input type="file" style={{margin:"auto"}} id="photo"/>
             </div>
             
           </div>
